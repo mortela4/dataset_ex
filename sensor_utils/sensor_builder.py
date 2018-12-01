@@ -31,10 +31,41 @@ def build_sensor_from_dataset(sensor_data_set=None):
         else:
             val = entry_value
         #
-        builder = builder.with_field(entry_name, entry_value)
+        if first_pass:
+            tmp = builder.with_field(entry_name, val)
+            first_pass = False
+        else:
+            tmp = tmp.with_field(sensor_prop_name, prop_value)
     #
-    return
+    sensor = tmp.build()
+    #
+    return sensor
 
+
+def build_sensor(sensor_clsname=None, base_clsname=None, props=None):
+    if sensor_clsname is None or base_clsname is None or props is None:
+        # TODO: possibly emit ERROR msg here - and/or throw??
+        print("ERROR: build_sensor() requires all of 'sensor_clsname', "
+              "'base_clsname' and 'ppack' parameters to be provided!")
+        return None
+    #
+    raw_obj = sensor_clsname(base_type=base_clsname)
+    sensor_builder = SensorBuilder(sensor_instance=raw_obj)
+    #
+    # Set up list of props:
+    # Build sensor:
+    first_pass = True
+    for sensor_prop_name, prop_value in props.items():
+        if sensor_prop_name != "sensor_type":
+            if first_pass:
+                tmp = sensor_builder.with_field(sensor_prop_name, prop_value)
+                first_pass = False
+            else:
+                tmp = tmp.with_field(sensor_prop_name, prop_value)
+    # Get final object:
+    sensor = tmp.build()
+    #
+    return sensor
 
 
 # **************** SENSOR-BUILDER ********************
